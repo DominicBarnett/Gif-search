@@ -1,5 +1,11 @@
 // Require Libraries
 const express = require('express');
+const Tenor = require("tenorjs").client({
+    // Replace with your own key
+    "Key": "AIzaSyA568v75g0vtwOOohYWrmUWLGXS6UXIQQE", // https://tenor.com/developer/keyregistration
+    "Filter": "high", // "off", "low", "medium", "high", not case sensitive
+    "Locale": "en_US", // Your locale here, case-sensitivity depends on input
+  });
 
 // App Setup
 const app = express();
@@ -35,9 +41,25 @@ app.set('views', './views');
     res.render('greetings', { name });
   })
   
-  app.get('/', (req, res) => {
-    console.log(req.query) // => "{ term: hey" }[/bold]
-    res.render('home')
+//   app.get('/', (req, res) => {
+//     console.log(req.query) // => "{ term: hey" }[/bold]
+//     res.render('home')
+//   })
+
+app.get('/', (req, res) => {
+    // Handle the home page when we haven't queried yet
+    term = ""
+    if (req.query.term) {
+        term = req.query.term
+    }
+    // Tenor.search.Query("SEARCH KEYWORD HERE", "LIMIT HERE")
+    Tenor.Search.Query(term, "10")
+        .then(response => {
+            // store the gifs we get back from the search
+            const gifs = response;
+            // pass the gifs as an object into the home page
+            res.render('home', { gifs })
+        }).catch(console.error);
   })
 
 // Start Server
